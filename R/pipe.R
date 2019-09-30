@@ -1,6 +1,7 @@
 #' Pipes
 #'
-#' Equivalents to magrittr's pipes
+#' Equivalents to magrittr's pipes, with the addition of a `%S>%` pipe that is
+#' just like `%>%` except it supports using `!!!` in any function.
 #'
 #' @param lhs A value or a dot (`.`).
 #' @param rhs A function call using pipe semantics of the relevant pipe.
@@ -48,6 +49,9 @@ NULL
   eval(rhs, envir = list(`.` = lhs), enclos = parent.frame())
 }
 
+#' @export
+#' @rdname pipes
+#' @inheritParams pipes
 `%S>%` <- function(lhs, rhs) {
   rhs <- substitute(rhs)
   rhs <- insert_dot(rhs)
