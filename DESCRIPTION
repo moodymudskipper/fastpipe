@@ -16,3 +16,5 @@ Imports:
     rlang
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
+URL: https://github.com/moodymudskipper/fastpipe
+BugReports: https://github.com/moodymudskipper/fastpipe/issues
