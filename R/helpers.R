@@ -1,3 +1,7 @@
+# to avoid notes on CMD CHECK
+`*RETURNED_CALL*` <- NULL
+`*RHS_CALL*` <- NULL
+
 standard_pipe_template <- function(lhs, rhs) {
   # mark the entrance in the pipe
   if(globals$master) {

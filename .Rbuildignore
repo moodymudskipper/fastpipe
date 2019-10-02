@@ -3,3 +3,4 @@
 ^README\.Rmd$
 ^\.travis\.yml$
 ^codecov\.yml$
+^benchmark$
