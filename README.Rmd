@@ -2,7 +2,10 @@
 output: github_document
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+  [![Travis build status](https://travis-ci.org/moodymudskipper/fastpipe.svg?branch=master)](https://travis-ci.org/moodymudskipper/fastpipe)
+  [![Codecov test coverage](https://codecov.io/gh/moodymudskipper/fastpipe/branch/master/graph/badge.svg)](https://codecov.io/gh/moodymudskipper/fastpipe?branch=master)
+  <!-- badges: end -->
+  
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
