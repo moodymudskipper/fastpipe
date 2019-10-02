@@ -2,19 +2,55 @@
 % Please edit documentation in R/pipe.R
 \name{pipes}
 \alias{pipes}
-\alias{\%>\%}
 \alias{\%<>\%}
+\alias{\%>\%}
+\alias{\%>>\%}
+\alias{\%>>>\%}
 \alias{\%T>\%}
+\alias{\%T>>\%}
+\alias{\%T>>>\%}
 \alias{\%$\%}
+\alias{\%$>>\%}
+\alias{\%$>>>\%}
+\alias{\%S>\%}
+\alias{\%S>>\%}
+\alias{\%S>>>\%}
+\alias{\%L>\%}
+\alias{\%L>>\%}
+\alias{\%L>>>\%}
 \title{Pipes}
 \usage{
+lhs \%<>\% rhs
+
 lhs \%>\% rhs
 
-lhs \%<>\% rhs
+lhs \%>>\% rhs
+
+lhs \%>>>\% rhs
 
 lhs \%T>\% rhs
 
+lhs \%T>>\% rhs
+
+lhs \%T>>>\% rhs
+
 lhs \%$\% rhs
+
+lhs \%$>>\% rhs
+
+lhs \%$>>>\% rhs
+
+lhs \%S>\% rhs
+
+lhs \%S>>\% rhs
+
+lhs \%S>>>\% rhs
+
+lhs \%L>\% rhs
+
+lhs \%L>>\% rhs
+
+lhs \%L>>>\% rhs
 }
 \arguments{
 \item{lhs}{A value or a dot (\code{.}).}
@@ -22,5 +58,11 @@ lhs \%$\% rhs
 \item{rhs}{A function call using pipe semantics of the relevant pipe.}
 }
 \description{
-Equivalents to magrittr's pipes
+Equivalents to magrittr's pipes, plus some additions :
+\itemize{
+\item The \code{\%S>\%} pipe is like \code{\%>\%} except it supports using \code{!!!} in any function.
+\item The \code{\%L>\%} pipe is like \code{\%>\%} except it logs to the console the call and the execution time.
+\item The \code{\%\*>>\%} family of pipes contains equivalent that go faster because they
+don't support functional chains (\code{. \%>\% foo() \%>\% bar()} nor the compound pipe (\code{\%<>\%}).
+}
 }

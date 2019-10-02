@@ -4,7 +4,6 @@ test_that("%>% handles anonymous functions in GlobalEnv", {
 
   # Simple vectorized function
   a <- (function(x) 1 + x^2/2 + x^3/9 + x^4/16)(1:100)
-
   b <-
     1:100 %>%
     (function(x) 1 + x^2/2 + x^3/9 + x^4/16)
@@ -79,3 +78,4 @@ test_that("%>% throws error with anonymous functions when not parenthesized.", {
   expect_that(iris %>% function(x) { head(x) }, throws_error())
 
 })
+

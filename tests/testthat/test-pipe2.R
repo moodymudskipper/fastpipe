@@ -10,10 +10,5 @@ test_that("pipe works",{
   x <- cars
   x %<>% head %>% dim
   expect_equal(x, c(6,2))
-  expect_equal(!!quote(c(a=1,b=1) %S>% c(!!!.)), c(a=1,b=1))
-
-  # for coverage
-  fastpipe:::.onLoad()
-  options( fastpipe.bare = NULL)
-  fastpipe:::.onLoad()
+  expect_equal(!!quote(c(a=1,b=1) %S>>% c(!!!.)), c(a=1,b=1))
 })

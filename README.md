@@ -3,10 +3,10 @@
 
 # fastpipe
 
-This package proposes an alternative to the pipe from ‘magrittr’. It’s
-named the same and passes all the ‘magrittr’ test so can easily be a
-drop-in replacement, its main advantages is that it is faster and solves
-most of the issues of *magrittr*
+This package proposes an alternative to the pipe from the *magrittr*
+package. It’s named the same and passes all the *magrittr* test so can
+easily be a drop-in replacement, its main advantages is that it is
+faster and solves most of the issues of *magrittr*.
 
 Install with :
 
@@ -14,87 +14,56 @@ Install with :
 remotes::install_github("fastpipe")
 ```
 
-## What’s different from *magrittr* ?
+## Families of pipes and performance
 
-The main differences are:
+  - A `%>%` family of pipes reproduce and extends the features offered
+    by *magrittr*
+  - A `%>>%` family of pipes behaves the same, but doesn’t support
+    functional sequences (`. %>% foo()`) nor compound assignment (`bar
+    %<>% baz()`)
+  - A `%>>>%` family of pipes behaves the same but doesn’t support
+    implicit dots
 
-  - It features an option `fastpipe.bare`, which is `FALSE` by default
-    but when set to `TRUE` turns off the features of compound assignment
-    (`%<>%`) and of functional sequences (`. %>% foo`)
-
-  - It is faster, especially whith `options(fastpipe.bare = TRUE)`
-
-<!-- end list -->
+For the 2 latter, skipping these steps has a dramatic effect on
+performance. We provide a benchmark below :
 
 ``` r
-microbenchmark::microbenchmark(
-  magrittr = {`%>%` <- magrittr::`%>%`
-  1 %>% identity %>% identity() %>% (identity) %>% {identity(.)}},
-  fastpipe = {`%>%` <- fastpipe::`%>%`
-  1 %>% identity %>% identity() %>% (identity) %>% {identity(.)}},
-  fastpipe_bare = {
-    options(fastpipe.bare = TRUE)
-    `%>%` <- fastpipe::`%>%`
-  1 %>% identity %>% identity() %>% (identity) %>% {identity(.)}
-    options(fastpipe.bare = FALSE)},
-  times=10000
+library(fastpipe)
+`%.%` <- fastpipe::`%>%` # (Note that a *fastpipe*, unlike a *magrittr* pipe, can be copied)
+`%>%` <- magrittr::`%>%`
+bench::mark(
+  'magrittr::`%>%`' =
+    1 %>% identity %>% identity() %>% (identity) %>% {identity(.)},
+  'fastpipe::`%>%`' =
+    1 %.% identity %.% identity() %.% (identity) %.% {identity(.)},
+  'fastpipe::`%>>%`' =
+    1 %>>% identity %>>% identity() %>>% (identity) %>>% {identity(.)},
+  'fastpipe::`%>>>%`' =
+    1 %>>>% identity(.) %>>>% identity(.) %>>>% identity(.) %>>>% identity(.),
+  base = identity(identity(identity(identity(1))))
 )
-#> Unit: microseconds
-#>           expr  min    lq      mean median     uq    max neval cld
-#>       magrittr 92.8 129.2 272.96893  195.3 416.35 5666.8 10000   c
-#>       fastpipe 74.0 102.1 212.82853  152.8 308.30 7056.8 10000  b 
-#>  fastpipe_bare 21.2  31.9  67.03829   47.6 102.20 4572.3 10000 a
+#> # A tibble: 5 x 6
+#>   expression             min   median `itr/sec` mem_alloc `gc/sec`
+#>   <bch:expr>        <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
+#> 1 magrittr::`%>%`     91.9us  137.7us     6522.   90.81KB     12.3
+#> 2 fastpipe::`%>%`     40.4us   47.7us    19782.   79.12KB     12.4
+#> 3 fastpipe::`%>>%`    13.8us     19us    49262.    4.92KB     19.7
+#> 4 fastpipe::`%>>>%`    8.9us   10.9us    85078.    4.45KB     25.5
+#> 5 base                   1us    1.3us   497347.        0B      0
+rm(`%>%`) # reseting `%>%` to fastpipe::`%>%`
 ```
 
-  - Its implementation is much simpler
+We see that our standard `%>%` pipe is twice faster, and that our
+`%>>>%` pipe is 10 times faster (on a properly formatted call).
 
-If we ignore the features of functional chains and compound pipe, the
-code is really just :
+## Issues solved and special features
 
-  - modify the rhs to insert explicit dot at the right place if relevant
-  - gives the dot the value of the lhs and evaluate it in the parent
-    environment
+*fastpipe* passes all *magrittr*’s tests, but it doesn’t stop there and
+solves most of its issues, at least most of the open issues on GitHub.
+
+  - Lazy evaluation
 
 <!-- end list -->
-
-``` r
-function(lhs, rhs) {
-  if(!getOption("fastpipe.bare")[[1]]){
-  origin <- get_origin(match.call())
-  if(origin$type == "fs") return(origin$fs)
-  if(origin$type == "compound") return(eval.parent(origin$modified_call))
-  }
-  rhs <- insert_dot(substitute(rhs))
-  eval(rhs, envir = list(`.` = lhs), enclos = parent.frame())
-}
-#> function(lhs, rhs) {
-#>   if(!getOption("fastpipe.bare")[[1]]){
-#>   origin <- get_origin(match.call())
-#>   if(origin$type == "fs") return(origin$fs)
-#>   if(origin$type == "compound") return(eval.parent(origin$modified_call))
-#>   }
-#>   rhs <- insert_dot(substitute(rhs))
-#>   eval(rhs, envir = list(`.` = lhs), enclos = parent.frame())
-#> }
-```
-
-Moreover pipe operators contain their own code while in *magrittr*’s
-current implementation they all have the main code and are recognized in
-the function by their name. Which leads to the next point.
-
-  - We can define new pipes
-
-It’s not made as easy as in my *pipe* package, but nonetheless we can
-define new pipes, which is forbidden by *magrittr* which allows only a
-given list of symbols.
-
-To do it we can copy `%>%` and tweak it. A pipe should have a class
-`pipe` to make functional chain and compound operator work.
-
-  - It is more robust
-
-It passes every test from magrittr, and deals with issues of lazy
-evaluation that were problematic without any adhoc adjustment.
 
 ``` r
 # https://github.com/tidyverse/magrittr/issues/195
@@ -104,7 +73,9 @@ identical(
   {fn <- gen(1); fn()},
   {fn <- 1 %>% gen(); fn()})
 #> [1] TRUE
+```
 
+``` r
 # https://github.com/tidyverse/magrittr/issues/159
 # Pipes of functions have broken environments
 identical(
@@ -117,10 +88,10 @@ identical(
     plus2(5)
 })
 #> [1] TRUE
+# Note : copy and pasted because didn't work with knitr
 ```
 
-  - It considers `!!!.` is considered as `.` when deciding wether to
-    insert a dot
+  - It considers `!!!.` as `.` when deciding wether to insert a dot
 
 This was requested by Lionel and seems fairly reasonable as its is
 unlikely that a user will nedd to use both `.` and `!!!.` in a call.
@@ -135,23 +106,6 @@ letters[1:3] %>% rlang::list2(!!!.)
 #> 
 #> [[3]]
 #> [1] "c"
-```
-
-  - The new pipe `%S>%` allows the use of *rlang*’s `!!!` operator to
-    splice dots in any function.
-
-<!-- end list -->
-
-``` r
-library(pipe)
-#> 
-#> Attaching package: 'pipe'
-#> The following object is masked _by_ '.GlobalEnv':
-#> 
-#>     %>%
-c(a = 1, b = 2) %S>% data.frame(!!!.)
-#>   a b
-#> 1 1 2
 ```
 
   - `:::`, `::` and `$` get a special treatment to solve a common issue
@@ -175,25 +129,161 @@ iris %>% x$y
 
 ``` r
 iris %>% head %<>% dim
-#> Error: A compound pipe should only be used at the start of the chain
+#> Error in iris %>% head %<>% dim: A compound pipe should only be used at the start of the chain
 . %<>% head
 #> Error in . %<>% head: You can't start a functional sequence on a compound operator
 ```
 
+  - The new pipe `%S>%` allows the use of *rlang*’s `!!!` operator to
+    splice dots in any function.
+
+<!-- end list -->
+
+``` r
+c(a = 1, b = 2) %S>% data.frame(!!!.)
+#>   a b
+#> 1 1 2
+```
+
+  - The new pipe `%L>%` behaves like `%>%` except that it logs to the
+    console the calls and the time they took to run.
+
+<!-- end list -->
+
+``` r
+1000000 %L>% rnorm() %L>% sapply(cos) %>% max
+#> rnorm(.)   ...
+#> ~  0.3 sec
+#> sapply(., cos)   ...
+#> ~  2.57 sec
+#> [1] 1
+```
+
+## Implementation
+
+The implementation is completely different from *magrittr*, we can sum
+it up as follow :
+
+  - `%>>>%` pipes : evaluate *rhs* in parent environment, overriding `.`
+    with the value of the *lhs*. Its code is extremely straightforward
+
+<!-- end list -->
+
+``` r
+`%>>>%`
+#> # a fastpipe object
+#> function (lhs, rhs) 
+#> {
+#>     rhs_call <- substitute(rhs)
+#>     eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
+#> }
+#> <bytecode: 0x0000000013733118>
+#> <environment: namespace:fastpipe>
+```
+
+  - `%>>%` pipes : same as above but use heuristics to insert dots, so
+    `x %>% head` becomes `x %>% head(.)` etc
+
+<!-- end list -->
+
+``` r
+`%>>%`
+#> # a fastpipe object
+#> function (lhs, rhs) 
+#> {
+#>     rhs_call <- insert_dot(substitute(rhs))
+#>     eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
+#> }
+#> <bytecode: 0x00000000136e23b8>
+#> <environment: namespace:fastpipe>
+```
+
+  - `%>%` pipes : same as above but must support functionnal sequences
+    and compound assignment, we do so by modifying global variables when
+    we find a relevant start to the pipe chain and reseting them when
+    going out.
+
+*fastpipe* operators contain their own code while in *magrittr*’s
+current implementation they all have the main code and are recognized in
+the function by their name. Moreover the pipe names are not hardcoded in
+the functions, which prevents confusion like the fast that `%$%` still
+sometimes work in *magrittr* when only `%<%` is reexported.
+<https://github.com/tidyverse/magrittr/issues/194>
+
+The pipes have a class, the functional sequences don’t, they are regular
+functions using the `%>>>%` family of *fastpipes*.
+
+``` r
+`%T>>%`
+#> # a fastpipe object
+#> function (lhs, rhs) 
+#> {
+#>     rhs_call <- insert_dot(substitute(rhs))
+#>     {
+#>         eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
+#>         lhs
+#>     }
+#> }
+#> <bytecode: 0x00000000136ac920>
+#> <environment: namespace:fastpipe>
+. %>% sin %>% cos() %T>% tan(.)
+#> function (.) 
+#> . %>>>% sin(.) %>>>% cos(.) %T>>>% tan(.)
+```
+
+## Benchmarks for functional sequences
+
+An interesting and little known fact is that using functional sequences
+in functionals is much more efficient than using lambda functions
+calling pipes, for instance : `purrr::map(foo, ~ .x %>% bar %>% baz)`
+will often be much slower than `purrr::map(foo, . %>% bar %>% baz)`. I
+tried to keep this nice feature but didn’t succeed to make it as
+efficient as in *magrittr*. The difference show only for large number of
+iteration and will probably be negligible in any realistic loop.
+
+``` r
+`%>%` <- magrittr::`%>%`
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# functional sequence with 5 iterations
+walk <- purrr::walk
+bench::mark(
+  purrr_lambda =
+  walk(1:5, ~.x %>% identity %>% identity() %>% (identity) %>% {identity(.)}),
+  magrittr =
+  walk(1:5, . %>% identity %>% identity() %>% (identity) %>% {identity(.)}),
+  fastpipe =
+  walk(1:5, . %.% identity %.% identity() %.% (identity) %.% {identity(.)})
+)
+#> # A tibble: 3 x 6
+#>   expression        min   median `itr/sec` mem_alloc `gc/sec`
+#>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
+#> 1 purrr_lambda    615us    743us     1265.    77.3KB     17.8
+#> 2 magrittr        153us    188us     5046.    26.8KB     14.0
+#> 3 fastpipe        126us    153us     6177.    19.1KB     16.2
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# functional sequence with 1000 iterations
+bench::mark(
+  purrr_lambda =
+    walk(1:1000, ~.x %>% identity %>% identity() %>% (identity) %>% {identity(.)}),
+  magrittr =
+    walk(1:1000, . %>% identity %>% identity() %>% (identity) %>% {identity(.)}),
+  fastpipe =
+    walk(1:1000, . %.% identity %.% identity() %.% (identity) %.% {identity(.)})
+)
+#> Warning: Some expressions had a GC in every iteration; so filtering is
+#> disabled.
+#> # A tibble: 3 x 6
+#>   expression        min   median `itr/sec` mem_alloc `gc/sec`
+#>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
+#> 1 purrr_lambda 168.91ms 188.69ms      5.44   281.3KB     14.5
+#> 2 magrittr       5.37ms   6.68ms    123.      8.13KB     13.9
+#> 3 fastpipe      10.98ms  13.97ms     60.8     7.86KB     17.6
+```
+
 ## A few notes
 
-This is just an experiment, it’s likely to change.
+This is an experiment, and might still change change.
 
-I’ve also been working on the package *pipe* which focuses on
-acompletely generalized approach of the pipe (while in this package the
-`%<>%` operatorneeds special treatment) and makes it easier to define
-new pipes, and to browse a pipe chain step by step.
-
-The drawbacks of the latter system is that it is slower (a little bit
-slower than *magrittr*), and it suffers from the same lazy evaluation
-issues as magrittr does.
-
-The current package might be better suited for programming because it’s
-robust, fast, and very light, while *pipe* might be better for
-interractive use where the lazy evaluation corner cases are unlikely to
-appear and where efficiently is less important.
+The current package might be well suited for programming because it’s
+robust, fast, and very light.

@@ -1,55 +1,68 @@
-is_pipe <- function(x) inherits(x, "pipe")
-
-get_origin <-function(x){
-  ind <- numeric(0)
-
-  repeat {
-    lhs <- x[[c(ind, 2)]]
-    # did we reach a symbol ?
-    if(length(lhs) == 1) {
-      # if it's a dot we have a fs, else a standard pipe
-      if(lhs == quote(.)) {
-        # modify code so it can be executed as a regular pipe
-        lhs <- quote((.))
-        #if(x[[c(ind, 1)]] == quote(`%<>%`))
-        return(list(type="fs", fs = as.function(c(alist(.=),bquote({
-          opt <- options(fastpipe.bare = TRUE)
-          on.exit(options(fastpipe.bare = opt[[1]]))
-          .(x)
-        })))))
-      }
-      return(list(type = "standard"))
-    }
-
-    # else go deeper
-    ind <- c(ind,2)
-    op <- x[[c(ind, 1)]]
-    lhs <- x[[c(ind, 2)]]
-
-    # did we reach a non pipe ?
-    if(!is_pipe(eval(op))) {
-      # if we found the compound pipe, check if we found the dot as well
-      if(op  == quote(`%<>%`)){
-        # compound AND dot
-        if(lhs == quote(.)) {
-          lhs <- quote(substitute(.))
-          stop("You can't start a functional sequence on a compound operator")
-        }
-
-        # compound at the wrong place
-        if(length(lhs) !=1 && is_pipe(eval(x[[c(ind,2,1)]])))
-          stop("The compound pipe `%<>%` should be used only at the start of the chain",
-               call. = FALSE)
-
-        # only compound
-        x[[c(ind, 1)]]  <- quote(`%>%`) # replace standard pipe
-
-        return(list(type = "compound", modified_call = bquote(
-          .(lhs) <- .(x))))
-      }
-      return(list(type = "standard"))
-    }
+standard_pipe_template <- function(lhs, rhs) {
+  # mark the entrance in the pipe
+  if(globals$master) {
+    sc <- sys.call()
+    # flips master switches, run back the call, and sort out the output
+    return(eval_slaves(sc, parent.frame()))
   }
+
+  lhs_call <- substitute(lhs)
+  rhs_call <- `*LHS_CALL*`
+
+  # initiate f_seq
+  if(lhs_call == quote(.)) {
+    turbo_pipe <- attr(sys.function(), "bare_version")
+    res <- call(turbo_pipe, lhs_call, rhs_call)
+    fs_on()
+    return(res)
+  }
+  force(lhs)
+  if(globals$is_fs) {
+    turbo_pipe <- attr(sys.function(), "bare_version")
+    res <- call(turbo_pipe, lhs, rhs_call)
+    return(res)
+  }
+
+  `*RETURNED_CALL*`
+}
+
+
+fast_pipe_template <- function(lhs, rhs) {
+  rhs_call <- `*LHS_CALL*`
+  `*RETURNED_CALL*`
+}
+
+turbo_pipe_template <- function(lhs, rhs) {
+  rhs_call <- substitute(rhs)
+  `*RETURNED_CALL*`
+}
+
+
+eval_slaves <- function(sc, env){
+  master_off()
+  on.exit(reset_globals())
+  res <- eval(sc, env)
+  if(globals$is_compound) {
+
+    res <- eval(bquote(.(globals$compound_lhs) <- .(res)),env)
+    return(invisible(res))
+  }
+  if(! globals$is_fs)
+    return(res)
+  res <- as.function(c(alist(.=),res),envir = env)
+  return(res)
+}
+
+initiate_fseq <- function(rhs_call) {
+  res <- list(rhs_call)
+  class(res) <- "f_seq"
+  res
+}
+
+incremment_fseq <- function(lhs, rhs_call) {
+  res <- c(lhs, rhs_call)
+  class(res) <- "f_seq"
+  res
 }
 
 insert_dot <- function(expr, special_cases = TRUE) {
@@ -73,3 +86,36 @@ insert_dot <- function(expr, special_cases = TRUE) {
   }
   expr
 }
+
+build_pipes <- function (root_name, lhs_call, returned_call) {
+  # standard pipe
+  nm1 <- paste0("%",root_name,">%")
+  pipe1 <- standard_pipe_template
+  body(pipe1) <- do.call(substitute, list(body(pipe1), list(
+    `*LHS_CALL*` = substitute(lhs_call),
+    `*RETURNED_CALL*` = substitute(returned_call))))
+
+  # fast pipe
+  nm2 <- paste0("%",root_name,">>%")
+  pipe2 <- fast_pipe_template
+  body(pipe2) <- do.call(substitute, list(body(pipe2), list(
+    `*LHS_CALL*` = substitute(lhs_call),
+    `*RETURNED_CALL*` = substitute(returned_call))))
+
+  # turbo pipe3
+  nm3 <- paste0("%",root_name,">>>%")
+  pipe3 <- turbo_pipe_template
+  body(pipe3) <- do.call(substitute, list(body(pipe3), list(
+    `*RETURNED_CALL*` = substitute(returned_call))))
+
+  # add turbo pipe as attribute of standard pipe, for construction of functional sequence
+  attr(pipe1, "bare_version") <- nm3
+  assign(nm1, pipe1, envir= parent.frame())
+  assign(nm2, pipe2, envir= parent.frame())
+  assign(nm3, pipe3, envir= parent.frame())
+}
+
+
+
+
+
