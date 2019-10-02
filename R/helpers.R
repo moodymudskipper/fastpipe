@@ -7,7 +7,7 @@ standard_pipe_template <- function(lhs, rhs) {
   }
 
   lhs_call <- substitute(lhs)
-  rhs_call <- `*LHS_CALL*`
+  rhs_call <- `*RHS_CALL*`
 
   # initiate f_seq
   if(lhs_call == quote(.)) {
@@ -47,18 +47,6 @@ eval_slaves <- function(sc, env){
   return(res)
 }
 
-initiate_fseq <- function(rhs_call) {
-  res <- list(rhs_call)
-  class(res) <- "f_seq"
-  res
-}
-
-incremment_fseq <- function(lhs, rhs_call) {
-  res <- c(lhs, rhs_call)
-  class(res) <- "f_seq"
-  res
-}
-
 insert_dot <- function(expr, special_cases = TRUE) {
   if(is.symbol(expr) || expr[[1]] == quote(`(`)) {
     # if a symbol or an expression inside parentheses, make it a call with dot arg
@@ -81,12 +69,12 @@ insert_dot <- function(expr, special_cases = TRUE) {
   expr
 }
 
-build_pipes <- function (root_name, lhs_call, returned_call) {
+build_pipes <- function (root_name, rhs_call, returned_call) {
   # standard pipe
   standard_pipe_nm <- paste0("%",root_name,">%")
   standard_pipe <- standard_pipe_template
   body(standard_pipe) <- do.call(substitute, list(body(standard_pipe), list(
-    `*LHS_CALL*` = substitute(lhs_call),
+    `*RHS_CALL*` = substitute(rhs_call),
     `*RETURNED_CALL*` = substitute(returned_call))))
 
   # bare pipe

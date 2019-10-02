@@ -41,7 +41,7 @@ NULL
 # %>%
 build_pipes(
   "",
-  lhs_call =
+  rhs_call =
     insert_dot(substitute(rhs)),
   returned_call =
     eval(rhs_call, envir = list(`.` = lhs), enclos = parent.frame())
@@ -50,7 +50,7 @@ build_pipes(
 # %L>%
 build_pipes(
   "L",
-  lhs_call =
+  rhs_call =
     insert_dot(substitute(rhs)),
   returned_call = {
     cat(paste(deparse(rhs_call), collapse = "\n"), "  ...\n")
@@ -64,7 +64,7 @@ build_pipes(
 # %T>%
 build_pipes(
   "T",
-  lhs_call =
+  rhs_call =
     insert_dot(substitute(rhs)),
   returned_call =
     {
@@ -76,7 +76,7 @@ build_pipes(
 # %$>%
 build_pipes(
   "$",
-  lhs_call =
+  rhs_call =
     substitute(rhs),
   returned_call =
     eval(bquote(with(.,.(rhs_call))), envir = list(`.` = lhs), enclos = parent.frame())
@@ -85,7 +85,7 @@ build_pipes(
 # %S>%
 build_pipes(
   "S",
-  lhs_call =
+  rhs_call =
     insert_dot(substitute(rhs)),
   returned_call =
     {
