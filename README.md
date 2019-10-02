@@ -15,7 +15,7 @@ faster and solves most of the issues of *magrittr*.
 Install with :
 
 ``` r
-remotes::install_github("fastpipe")
+remotes::install_github("moodymudskipper/fastpipe")
 ```
 
 ## Issues solved and special features
@@ -115,9 +115,9 @@ c(a = 1, b = 2) %S>% data.frame(!!!.)
 ``` r
 1000000 %L>% rnorm() %L>% sapply(cos) %>% max
 #> rnorm(.)   ...
-#> ~  0.23 sec
+#> ~  0.25 sec
 #> sapply(., cos)   ...
-#> ~  1.96 sec
+#> ~  1.78 sec
 #> [1] 1
 ```
 
@@ -149,11 +149,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression            min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>       <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 magrittr::`%>%`   129.4us  302.1us     3035.   88.57KB     4.43
-#> 2 fastpipe::`%>%`    59.5us  128.5us     7369.        0B     4.36
-#> 3 fastpipe::`%>>%`   11.6us   26.4us    34892.    4.45KB     6.98
-#> 4 base                1.6us    3.7us   252085.        0B     0   
-#> 5 median(1:3)        29.9us   60.2us    13685.   26.61KB     4.94
+#> 1 magrittr::`%>%`   140.3us  311.9us     2848.   88.57KB     4.32
+#> 2 fastpipe::`%>%`    52.5us  133.4us     6975.        0B     4.37
+#> 3 fastpipe::`%>>%`   11.7us   29.9us    32811.    4.45KB     6.56
+#> 4 base                1.3us    4.5us   228915.        0B     0   
+#> 5 median(1:3)        43.9us  107.9us     8566.   26.61KB     2.46
 rm(`%>%`) # reseting `%>%` to fastpipe::`%>%`
 ```
 
@@ -185,7 +185,7 @@ it up as follow :
 #>     rhs_call <- substitute(rhs)
 #>     eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
 #> }
-#> <bytecode: 0x000000001abe7730>
+#> <bytecode: 0x000000001abfa850>
 #> <environment: namespace:fastpipe>
 ```
 
@@ -259,7 +259,7 @@ don’t.
 #>         lhs
 #>     }
 #> }
-#> <bytecode: 0x0000000018751190>
+#> <bytecode: 0x000000001a9d98f0>
 #> <environment: namespace:fastpipe>
 . %>% sin %>% cos() %T>% tan(.)
 #> function (.) 
@@ -297,11 +297,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  736.1us   1.41ms      591.    63.2KB     6.90
-#> 2 fastpipe      128.7us 285.55us     3218.    32.1KB     6.82
-#> 3 magrittr      163.5us  316.3us     2611.    13.8KB     6.76
-#> 4 base           12.2us   27.6us    28746.    10.1KB     5.75
-#> 5 median(1:3)      26us   59.8us    13693.        0B     4.37
+#> 1 rlang_lambda  824.7us   1.69ms      545.    63.2KB     7.11
+#> 2 fastpipe      149.7us  424.9us     2508.    32.1KB     4.56
+#> 3 magrittr      185.1us  539.1us     1999.    13.8KB     4.44
+#> 4 base           16.1us   37.2us    24730.    10.1KB     7.42
+#> 5 median(1:3)      35us   76.9us    12179.        0B     4.39
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # functional sequence with 1000 iterations
@@ -321,11 +321,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  347.6ms 354.32ms      2.82  277.39KB     5.64
-#> 2 fastpipe      16.91ms  30.11ms     30.7     3.95KB     7.67
-#> 3 magrittr       7.47ms  15.29ms     61.1     4.23KB     5.92
-#> 4 base           2.11ms   3.93ms    188.     14.09KB     7.90
-#> 5 median(1:3)      33us   71.3us  12052.          0B     4.00
+#> 1 rlang_lambda  359.5ms 374.89ms      2.67  277.39KB     5.33
+#> 2 fastpipe      23.23ms  34.41ms     27.6     3.95KB     5.92
+#> 3 magrittr       8.07ms  18.43ms     48.8     4.23KB     5.85
+#> 4 base           3.11ms   7.32ms    137.     14.09KB     3.97
+#> 5 median(1:3)    35.3us  104.8us   9108.          0B     4.00
 ```
 
 ## Note

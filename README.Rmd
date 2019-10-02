@@ -26,7 +26,7 @@ of *magrittr*.
 Install with :
 
 ``` r
-remotes::install_github("fastpipe")
+remotes::install_github("moodymudskipper/fastpipe")
 ```
 
 ## Issues solved and special features
