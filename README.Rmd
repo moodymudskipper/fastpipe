@@ -213,8 +213,9 @@ The pipes have a class and a printing methods, the functional sequences don't.
 ## Benchmarks for functional sequences
 
 An interesting and little known fact is that using functional sequences in functionals
-is much more efficient than using lambda functions calling pipes, for instance :
-`purrr::map(foo, ~ .x %>% bar %>% baz)` will often be much slower than
+is much more efficient than using lambda functions calling pipes (though it will
+generally be largely offset by the content of the fonction), for instance :
+`purrr::map(foo, ~ .x %>% bar %>% baz)` is slower than
 `purrr::map(foo, . %>% bar %>% baz)`. I tried to keep this nice feature but
 didn't succeed to make it as efficient as in *magrittr*. The difference show only
 for large number of iteration and will probably be negligible in any realistic loop.

@@ -1,5 +1,9 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+[![Travis build
+status](https://travis-ci.org/moodymudskipper/fastpipe.svg?branch=master)](https://travis-ci.org/moodymudskipper/fastpipe)
+[![Codecov test
+coverage](https://codecov.io/gh/moodymudskipper/fastpipe/branch/master/graph/badge.svg)](https://codecov.io/gh/moodymudskipper/fastpipe?branch=master)
+<!-- badges: end -->
 
 # fastpipe
 
@@ -111,9 +115,9 @@ c(a = 1, b = 2) %S>% data.frame(!!!.)
 ``` r
 1000000 %L>% rnorm() %L>% sapply(cos) %>% max
 #> rnorm(.)   ...
-#> ~  0.31 sec
+#> ~  0.21 sec
 #> sapply(., cos)   ...
-#> ~  2.11 sec
+#> ~  1.81 sec
 #> [1] 1
 ```
 
@@ -145,11 +149,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression            min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>       <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 magrittr::`%>%`   178.7us    417us     2574.   88.57KB     4.43
-#> 2 fastpipe::`%>%`    72.4us  176.8us     5591.        0B     2.08
-#> 3 fastpipe::`%>>%`   14.5us   36.7us    25799.    4.45KB     5.16
-#> 4 base                1.6us    4.5us   223303.        0B     0   
-#> 5 median(1:3)        41.1us  100.3us     9518.   26.61KB     5.38
+#> 1 magrittr::`%>%`   152.8us  309.5us     2946.   88.57KB     4.44
+#> 2 fastpipe::`%>%`    50.9us  101.8us     7924.        0B     4.36
+#> 3 fastpipe::`%>>%`   11.7us   32.5us    32744.    4.45KB     6.55
+#> 4 base                1.1us    2.5us   307099.        0B     0   
+#> 5 median(1:3)        29.1us     65us    13414.   26.61KB     4.83
 rm(`%>%`) # reseting `%>%` to fastpipe::`%>%`
 ```
 
@@ -181,7 +185,7 @@ it up as follow :
 #>     rhs_call <- substitute(rhs)
 #>     eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
 #> }
-#> <bytecode: 0x000000001ac2b2a8>
+#> <bytecode: 0x000000001ac2f5f0>
 #> <environment: namespace:fastpipe>
 ```
 
@@ -255,7 +259,7 @@ don’t.
 #>         lhs
 #>     }
 #> }
-#> <bytecode: 0x000000001b357758>
+#> <bytecode: 0x000000001a7c0bc0>
 #> <environment: namespace:fastpipe>
 . %>% sin %>% cos() %T>% tan(.)
 #> function (.) 
@@ -266,11 +270,12 @@ don’t.
 
 An interesting and little known fact is that using functional sequences
 in functionals is much more efficient than using lambda functions
-calling pipes, for instance : `purrr::map(foo, ~ .x %>% bar %>% baz)`
-will often be much slower than `purrr::map(foo, . %>% bar %>% baz)`. I
-tried to keep this nice feature but didn’t succeed to make it as
-efficient as in *magrittr*. The difference show only for large number of
-iteration and will probably be negligible in any realistic loop.
+calling pipes (though it will generally be largely offset by the content
+of the fonction), for instance : `purrr::map(foo, ~ .x %>% bar %>% baz)`
+is slower than `purrr::map(foo, . %>% bar %>% baz)`. I tried to keep
+this nice feature but didn’t succeed to make it as efficient as in
+*magrittr*. The difference show only for large number of iteration and
+will probably be negligible in any realistic loop.
 
 ``` r
 `%.%` <- fastpipe::`%>%`
@@ -292,11 +297,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  923.3us   2.01ms      496.    63.2KB     4.35
-#> 2 fastpipe      166.9us  407.6us     2629.    32.1KB     7.11
-#> 3 magrittr      226.7us  558.2us     1740.    13.8KB     2.11
-#> 4 base             16us   38.5us    24125.    10.1KB     7.24
-#> 5 median(1:3)    34.9us   99.8us    10663.        0B     4.41
+#> 1 rlang_lambda  812.8us   1.68ms      552.    63.2KB     7.07
+#> 2 fastpipe      119.4us  260.7us     3355.    32.1KB     6.78
+#> 3 magrittr        178us 352.25us     2567.    13.8KB     6.77
+#> 4 base           13.6us   27.1us    29189.    10.1KB     5.84
+#> 5 median(1:3)    33.8us   72.3us    12999.        0B     4.33
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # functional sequence with 1000 iterations
@@ -316,11 +321,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda 379.47ms 468.06ms      2.14  277.39KB     4.27
-#> 2 fastpipe      29.86ms  41.01ms     20.4     3.95KB     5.57
-#> 3 magrittr      13.17ms  20.61ms     41.7     4.23KB     3.97
-#> 4 base           2.87ms   6.57ms    139.     14.09KB     3.96
-#> 5 median(1:3)    41.1us   99.9us   9247.          0B     4.00
+#> 1 rlang_lambda 340.08ms 340.75ms      2.93  277.39KB     5.87
+#> 2 fastpipe      25.51ms  34.45ms     27.2     3.95KB     7.78
+#> 3 magrittr       7.81ms  14.73ms     66.3     4.23KB     5.85
+#> 4 base           2.32ms   4.65ms    180.     14.09KB     7.73
+#> 5 median(1:3)    29.2us   81.3us  11477.          0B     4.00
 ```
 
 ## Note
