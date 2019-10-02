@@ -31,7 +31,8 @@ NULL
   if(globals$master)
     return(invisible(eval.parent(substitute(lhs <- lhs %>% rhs))))
 
-  res <- eval.parent(substitute(lhs %>>% rhs))
+  res <- eval.parent(substitute(LHS %>>% RHS, list(
+    LHS = lhs_call, RHS = insert_dot(substitute(rhs)))))
   compound_on()
   set_compound_lhs(lhs_call)
   res
