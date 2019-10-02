@@ -115,9 +115,9 @@ c(a = 1, b = 2) %S>% data.frame(!!!.)
 ``` r
 1000000 %L>% rnorm() %L>% sapply(cos) %>% max
 #> rnorm(.)   ...
-#> ~  0.21 sec
+#> ~  0.23 sec
 #> sapply(., cos)   ...
-#> ~  1.81 sec
+#> ~  1.96 sec
 #> [1] 1
 ```
 
@@ -149,11 +149,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression            min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>       <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 magrittr::`%>%`   152.8us  309.5us     2946.   88.57KB     4.44
-#> 2 fastpipe::`%>%`    50.9us  101.8us     7924.        0B     4.36
-#> 3 fastpipe::`%>>%`   11.7us   32.5us    32744.    4.45KB     6.55
-#> 4 base                1.1us    2.5us   307099.        0B     0   
-#> 5 median(1:3)        29.1us     65us    13414.   26.61KB     4.83
+#> 1 magrittr::`%>%`   129.4us  302.1us     3035.   88.57KB     4.43
+#> 2 fastpipe::`%>%`    59.5us  128.5us     7369.        0B     4.36
+#> 3 fastpipe::`%>>%`   11.6us   26.4us    34892.    4.45KB     6.98
+#> 4 base                1.6us    3.7us   252085.        0B     0   
+#> 5 median(1:3)        29.9us   60.2us    13685.   26.61KB     4.94
 rm(`%>%`) # reseting `%>%` to fastpipe::`%>%`
 ```
 
@@ -185,7 +185,7 @@ it up as follow :
 #>     rhs_call <- substitute(rhs)
 #>     eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
 #> }
-#> <bytecode: 0x000000001ac2f5f0>
+#> <bytecode: 0x000000001abe7730>
 #> <environment: namespace:fastpipe>
 ```
 
@@ -259,7 +259,7 @@ don’t.
 #>         lhs
 #>     }
 #> }
-#> <bytecode: 0x000000001a7c0bc0>
+#> <bytecode: 0x0000000018751190>
 #> <environment: namespace:fastpipe>
 . %>% sin %>% cos() %T>% tan(.)
 #> function (.) 
@@ -297,11 +297,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  812.8us   1.68ms      552.    63.2KB     7.07
-#> 2 fastpipe      119.4us  260.7us     3355.    32.1KB     6.78
-#> 3 magrittr        178us 352.25us     2567.    13.8KB     6.77
-#> 4 base           13.6us   27.1us    29189.    10.1KB     5.84
-#> 5 median(1:3)    33.8us   72.3us    12999.        0B     4.33
+#> 1 rlang_lambda  736.1us   1.41ms      591.    63.2KB     6.90
+#> 2 fastpipe      128.7us 285.55us     3218.    32.1KB     6.82
+#> 3 magrittr      163.5us  316.3us     2611.    13.8KB     6.76
+#> 4 base           12.2us   27.6us    28746.    10.1KB     5.75
+#> 5 median(1:3)      26us   59.8us    13693.        0B     4.37
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # functional sequence with 1000 iterations
@@ -321,13 +321,27 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda 340.08ms 340.75ms      2.93  277.39KB     5.87
-#> 2 fastpipe      25.51ms  34.45ms     27.2     3.95KB     7.78
-#> 3 magrittr       7.81ms  14.73ms     66.3     4.23KB     5.85
-#> 4 base           2.32ms   4.65ms    180.     14.09KB     7.73
-#> 5 median(1:3)    29.2us   81.3us  11477.          0B     4.00
+#> 1 rlang_lambda  347.6ms 354.32ms      2.82  277.39KB     5.64
+#> 2 fastpipe      16.91ms  30.11ms     30.7     3.95KB     7.67
+#> 3 magrittr       7.47ms  15.29ms     61.1     4.23KB     5.92
+#> 4 base           2.11ms   3.93ms    188.     14.09KB     7.90
+#> 5 median(1:3)      33us   71.3us  12052.          0B     4.00
 ```
 
 ## Note
 
-The package is young and might still change.
+  - The package is young and might still change.
+  - *magrittr*’s pipe is widespread and reexported by prominent
+    *tidyverse* packages. It could have been annoying if they masked
+    *fastpipe* ’s operator(s) each time so I set a hook so that whenever
+    *magrittr*, *dplyr*, *purrr*, or *tidyr* are attached *fastpipe*
+    will be detached and reattached at the end of the search path. This
+    assumes that if you attach *fastpipe* you want to use its pipes by
+    default, which I think is reasonnable. A message makes it explicit,
+    for instance :
+
+> Attaching package: ‘dplyr’
+> 
+> The following object is masked \_by\_ ‘package:fastpipe’:
+> 
+>     %>%

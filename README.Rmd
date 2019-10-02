@@ -255,4 +255,16 @@ bench::mark(check=F,
 
 ## Note
 
-The package is young and might still change.
+* The package is young and might still change.
+* *magrittr*'s pipe is widespread and reexported by prominent *tidyverse*
+  packages. It could have been annoying if they masked *fastpipe* 's operator(s)
+  each time so I set a hook so that whenever *magrittr*, *dplyr*, *purrr*, or *tidyr* are attached *fastpipe* will be detached and reattached at the end of
+  the search path. This assumes that if you attach *fastpipe* you want to use
+  its pipes by default, which I think is reasonnable. A message makes it explicit,
+  for instance : 
+  
+> Attaching package: ‘dplyr’
+>
+> The following object is masked \_by\_ ‘package:fastpipe’:
+>
+>     %>%
