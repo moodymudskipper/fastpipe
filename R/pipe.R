@@ -109,22 +109,12 @@ build_pipes(
 #' @export
 #' @rdname pipes
 #' @inheritParams pipes
-`%>>>%` <- `%>>>%`
-
-#' @export
-#' @rdname pipes
-#' @inheritParams pipes
 `%T>%` <- `%T>%`
 
 #' @export
 #' @rdname pipes
 #' @inheritParams pipes
 `%T>>%` <- `%T>>%`
-
-#' @export
-#' @rdname pipes
-#' @inheritParams pipes
-`%T>>>%` <- `%T>>>%`
 
 #' @export
 #' @rdname pipes
@@ -139,22 +129,12 @@ build_pipes(
 #' @export
 #' @rdname pipes
 #' @inheritParams pipes
-`%$>>>%` <- `%$>>>%`
-
-#' @export
-#' @rdname pipes
-#' @inheritParams pipes
 `%S>%` <- `%S>%`
 
 #' @export
 #' @rdname pipes
 #' @inheritParams pipes
 `%S>>%` <- `%S>>%`
-
-#' @export
-#' @rdname pipes
-#' @inheritParams pipes
-`%S>>>%` <- `%S>>>%`
 
 #' @export
 #' @rdname pipes
@@ -166,16 +146,16 @@ build_pipes(
 #' @inheritParams pipes
 `%L>>%` <- `%L>>%`
 
-#' @export
-#' @rdname pipes
-#' @inheritParams pipes
-`%L>>>%` <- `%L>>>%`
+
 
 class(`%>%`) <- class(`%T>%`) <- class(`%$%`) <- class(`%S>%`) <- class(`%L>%`) <-
   class(`%>>%`) <- class(`%T>>%`)  <- class(`%$>>%`) <- class(`%S>>%`) <- class(`%L>>%`) <-
-  class(`%>>>%`) <- class(`%T>>>%`)  <- class(`%$>>>%`) <- class(`%S>>>%`) <- class(`%L>>>%`) <-
   "fastpipe"
 
+#' Print a fastpipe object
+#'
+#' @param x object to print
+#' @param ... Ignored, kept for compatibility with other methods
 #' @export
 print.fastpipe <- function(x, ...){
   cat("# a fastpipe object\n")
@@ -187,5 +167,14 @@ print.fastpipe <- function(x, ...){
   invisible(x)
 }
 
-is_fastpipe <- function(x) inherits(x, "fastpipe")
+
+#' Test if Object is a fastpipe
+#'
+#' @param x object to test
+#'
+#' @return a length one logical
+#' @export
+is_fastpipe <- function(x) {
+  inherits(x, "fastpipe")
+}
 

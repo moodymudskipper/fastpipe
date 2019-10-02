@@ -11,28 +11,22 @@ standard_pipe_template <- function(lhs, rhs) {
 
   # initiate f_seq
   if(lhs_call == quote(.)) {
-    turbo_pipe <- attr(sys.function(), "bare_version")
-    res <- call(turbo_pipe, lhs_call, rhs_call)
+    bare_pipe <- attr(sys.function(), "bare_version")
+    res <- call(bare_pipe, lhs_call, rhs_call)
     fs_on()
     return(res)
   }
   force(lhs)
   if(globals$is_fs) {
-    turbo_pipe <- attr(sys.function(), "bare_version")
-    res <- call(turbo_pipe, lhs, rhs_call)
+    bare_pipe <- attr(sys.function(), "bare_version")
+    res <- call(bare_pipe, lhs, rhs_call)
     return(res)
   }
 
   `*RETURNED_CALL*`
 }
 
-
-fast_pipe_template <- function(lhs, rhs) {
-  rhs_call <- `*LHS_CALL*`
-  `*RETURNED_CALL*`
-}
-
-turbo_pipe_template <- function(lhs, rhs) {
+bare_pipe_template <- function(lhs, rhs) {
   rhs_call <- substitute(rhs)
   `*RETURNED_CALL*`
 }
@@ -89,33 +83,20 @@ insert_dot <- function(expr, special_cases = TRUE) {
 
 build_pipes <- function (root_name, lhs_call, returned_call) {
   # standard pipe
-  nm1 <- paste0("%",root_name,">%")
-  pipe1 <- standard_pipe_template
-  body(pipe1) <- do.call(substitute, list(body(pipe1), list(
+  standard_pipe_nm <- paste0("%",root_name,">%")
+  standard_pipe <- standard_pipe_template
+  body(standard_pipe) <- do.call(substitute, list(body(standard_pipe), list(
     `*LHS_CALL*` = substitute(lhs_call),
     `*RETURNED_CALL*` = substitute(returned_call))))
 
-  # fast pipe
-  nm2 <- paste0("%",root_name,">>%")
-  pipe2 <- fast_pipe_template
-  body(pipe2) <- do.call(substitute, list(body(pipe2), list(
-    `*LHS_CALL*` = substitute(lhs_call),
+  # bare pipe
+  bare_pipe_nm <- paste0("%",root_name,">>%")
+  bare_pipe <- bare_pipe_template
+  body(bare_pipe) <- do.call(substitute, list(body(bare_pipe), list(
     `*RETURNED_CALL*` = substitute(returned_call))))
 
-  # turbo pipe3
-  nm3 <- paste0("%",root_name,">>>%")
-  pipe3 <- turbo_pipe_template
-  body(pipe3) <- do.call(substitute, list(body(pipe3), list(
-    `*RETURNED_CALL*` = substitute(returned_call))))
-
-  # add turbo pipe as attribute of standard pipe, for construction of functional sequence
-  attr(pipe1, "bare_version") <- nm3
-  assign(nm1, pipe1, envir= parent.frame())
-  assign(nm2, pipe2, envir= parent.frame())
-  assign(nm3, pipe3, envir= parent.frame())
+  # add bare pipe as attribute of standard pipe, for construction of functional sequence
+  attr(standard_pipe, "bare_version") <- bare_pipe_nm
+  assign(standard_pipe_nm, standard_pipe, envir= parent.frame())
+  assign(bare_pipe_nm, bare_pipe, envir= parent.frame())
 }
-
-
-
-
-

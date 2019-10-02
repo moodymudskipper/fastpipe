@@ -5,19 +5,14 @@
 \alias{\%<>\%}
 \alias{\%>\%}
 \alias{\%>>\%}
-\alias{\%>>>\%}
 \alias{\%T>\%}
 \alias{\%T>>\%}
-\alias{\%T>>>\%}
 \alias{\%$\%}
 \alias{\%$>>\%}
-\alias{\%$>>>\%}
 \alias{\%S>\%}
 \alias{\%S>>\%}
-\alias{\%S>>>\%}
 \alias{\%L>\%}
 \alias{\%L>>\%}
-\alias{\%L>>>\%}
 \title{Pipes}
 \usage{
 lhs \%<>\% rhs
@@ -26,31 +21,21 @@ lhs \%>\% rhs
 
 lhs \%>>\% rhs
 
-lhs \%>>>\% rhs
-
 lhs \%T>\% rhs
 
 lhs \%T>>\% rhs
-
-lhs \%T>>>\% rhs
 
 lhs \%$\% rhs
 
 lhs \%$>>\% rhs
 
-lhs \%$>>>\% rhs
-
 lhs \%S>\% rhs
 
 lhs \%S>>\% rhs
 
-lhs \%S>>>\% rhs
-
 lhs \%L>\% rhs
 
 lhs \%L>>\% rhs
-
-lhs \%L>>>\% rhs
 }
 \arguments{
 \item{lhs}{A value or a dot (\code{.}).}
