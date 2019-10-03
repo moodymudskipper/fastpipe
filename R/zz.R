@@ -1,12 +1,11 @@
 .onLoad <- function(libname, pkgname){
-  setHook(packageEvent("magrittr", "attach"),
+  pkgs <- c(
+    "magrittr","dplyr","purrr", "tidyr", "stringr", "forcats", "rvest",
+    "modelr", "testthat")
+  for(pkg in pkgs){
+  setHook(packageEvent(pkg, "attach"),
           function(...) fastpipe_first())
-  setHook(packageEvent("dplyr", "attach"),
-          function(...) fastpipe_first())
-  setHook(packageEvent("purrr", "attach"),
-          function(...) fastpipe_first())
-  setHook(packageEvent("tidyr", "attach"),
-          function(...) fastpipe_first())
+  }
 }
 
 fastpipe_first <- function(){
