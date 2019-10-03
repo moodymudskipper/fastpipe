@@ -255,7 +255,37 @@ bench::mark(check=F,
 )
 ```
 
-## Note
+## Breaking changes
+
+The fact that the tests of *magrittr* are passed by *fastpipe* doesn't mean
+that *fastpipe* will necessarily behave as expected by *magrittr*'s users in
+all cicumstances.
+
+Here are the main such cases :
+
+* In *pastpipe* functional sequences don't have a class and are not subsetable.
+ This is a feature that Stefan Bache wanted to weed out of his package, but can
+ still break some code.
+ 
+* We said earlier that the instances of using both `!!!.` and `.` are expected
+ to be rare, but they happen nonetheless. The call `mtcars[8:11] %>% dplyr::count(!!!.)`
+ works with *magrittr* but with *fastpipe* we need `mtcars[8:11] %>% dplyr::count(., !!!.)`.
+ 
+* If `%T>%` or `%$%` are not reexported by a package which reexports `%>%`,
+ they will not be usable at all, while at the moment after attaching dplyr you can
+ do `cars %$% speed %>% head(2)` even if `%$%` is nowhere to be found. It's a feature
+ of *fastpipe* rather than a bug but will still break the code of those who forgot
+ to attach *magrittr* and had their code work by luck.
+ 
+* If reexporting `%>%` from *fastpipe*, one must also reexport `%>>%` as it is
+ used by functional sequences.
+ 
+* If you do strange things like ``cars %>% `$`("spee")`` it won't work
+with *fastpipe* because `$`, `::` and `:::` are special cases and *fastpipe*
+would basically try to run `'$'("spee",)(cars)` and choke because there'd be
+no second argument to `$`.
+
+## Notes
 
 *  The package *magrittr* was created by Stefan Milton Bache and Hadley Wickham.
   The design of the pipe's interface and most of the testing code of this package
