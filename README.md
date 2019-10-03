@@ -8,9 +8,11 @@ coverage](https://codecov.io/gh/moodymudskipper/fastpipe/branch/master/graph/bad
 # fastpipe
 
 This package proposes an alternative to the pipe from the *magrittr*
-package. It’s named the same and passes all the *magrittr* test so can
-easily be a drop-in replacement, its main advantages is that it is
-faster and solves most of the issues of *magrittr*.
+package.
+
+It’s named the same and passes all the *magrittr* test so can easily be
+a drop-in replacement, its main advantages is that it is faster and
+solves most of the issues of *magrittr*.
 
 Install with :
 
@@ -117,7 +119,7 @@ c(a = 1, b = 2) %S>% data.frame(!!!.)
 #> rnorm(.)   ...
 #> ~  0.25 sec
 #> sapply(., cos)   ...
-#> ~  1.78 sec
+#> ~  1.95 sec
 #> [1] 1
 ```
 
@@ -149,11 +151,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression            min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>       <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 magrittr::`%>%`   140.3us  311.9us     2848.   88.57KB     4.32
-#> 2 fastpipe::`%>%`    52.5us  133.4us     6975.        0B     4.37
-#> 3 fastpipe::`%>>%`   11.7us   29.9us    32811.    4.45KB     6.56
-#> 4 base                1.3us    4.5us   228915.        0B     0   
-#> 5 median(1:3)        43.9us  107.9us     8566.   26.61KB     2.46
+#> 1 magrittr::`%>%`   148.3us  350.8us     2660.   88.57KB     4.49
+#> 2 fastpipe::`%>%`    54.6us  166.8us     6165.        0B     2.08
+#> 3 fastpipe::`%>>%`   11.9us   35.1us    29830.    4.45KB     5.97
+#> 4 base                1.6us    4.3us   241732.        0B    24.2 
+#> 5 median(1:3)        41.2us  101.5us    10331.   26.61KB     2.48
 rm(`%>%`) # reseting `%>%` to fastpipe::`%>%`
 ```
 
@@ -185,7 +187,7 @@ it up as follow :
 #>     rhs_call <- substitute(rhs)
 #>     eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
 #> }
-#> <bytecode: 0x000000001abfa850>
+#> <bytecode: 0x000000001abe3eb8>
 #> <environment: namespace:fastpipe>
 ```
 
@@ -259,7 +261,7 @@ don’t.
 #>         lhs
 #>     }
 #> }
-#> <bytecode: 0x000000001a9d98f0>
+#> <bytecode: 0x00000000187272f8>
 #> <environment: namespace:fastpipe>
 . %>% sin %>% cos() %T>% tan(.)
 #> function (.) 
@@ -297,11 +299,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  824.7us   1.69ms      545.    63.2KB     7.11
-#> 2 fastpipe      149.7us  424.9us     2508.    32.1KB     4.56
-#> 3 magrittr      185.1us  539.1us     1999.    13.8KB     4.44
-#> 4 base           16.1us   37.2us    24730.    10.1KB     7.42
-#> 5 median(1:3)      35us   76.9us    12179.        0B     4.39
+#> 1 rlang_lambda  735.1us   1.44ms      595.    63.2KB     6.78
+#> 2 fastpipe      109.1us  402.1us     2772.    32.1KB     6.68
+#> 3 magrittr      156.2us  287.7us     2750.    13.8KB     6.52
+#> 4 base           13.8us   26.1us    30011.    10.1KB     6.00
+#> 5 median(1:3)    29.4us   58.1us    13955.        0B     4.36
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # functional sequence with 1000 iterations
@@ -321,15 +323,19 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  359.5ms 374.89ms      2.67  277.39KB     5.33
-#> 2 fastpipe      23.23ms  34.41ms     27.6     3.95KB     5.92
-#> 3 magrittr       8.07ms  18.43ms     48.8     4.23KB     5.85
-#> 4 base           3.11ms   7.32ms    137.     14.09KB     3.97
-#> 5 median(1:3)    35.3us  104.8us   9108.          0B     4.00
+#> 1 rlang_lambda  371.1ms 394.51ms      2.53  277.39KB     6.34
+#> 2 fastpipe       19.5ms  30.27ms     31.8     3.95KB     5.96
+#> 3 magrittr       6.74ms  15.94ms     62.9     4.23KB     7.86
+#> 4 base           2.03ms   5.46ms    175.     14.09KB     5.95
+#> 5 median(1:3)    30.2us   73.6us  11577.          0B     4.00
 ```
 
 ## Note
 
+  - The package *magrittr* was created by Stefan Milton Bache and Hadley
+    Wickham. The design of the pipe’s interface and most of the testing
+    code of this package is their work or the work of other *magrittr*
+    contributors, while none of the remaining code is.
   - The package is young and might still change.
   - *magrittr*’s pipe is widespread and reexported by prominent
     *tidyverse* packages. It could have been annoying if they masked

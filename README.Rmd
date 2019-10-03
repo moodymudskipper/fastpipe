@@ -18,10 +18,12 @@ knitr::opts_chunk$set(
 
 # fastpipe
 
-This package proposes an alternative to the pipe from the *magrittr* package. 
+This package proposes an alternative to the pipe from the *magrittr* package.
+
 It's named the same and passes all the *magrittr* test so can easily be a drop-in
 replacement, its main advantages is that it is faster and solves most of the issues
 of *magrittr*.
+
 
 Install with :
 
@@ -255,6 +257,10 @@ bench::mark(check=F,
 
 ## Note
 
+*  The package *magrittr* was created by Stefan Milton Bache and Hadley Wickham.
+  The design of the pipe's interface and most of the testing code of this package
+  is their work or the work of other *magrittr* contributors, while none of the 
+  remaining code is.
 * The package is young and might still change.
 * *magrittr*'s pipe is widespread and reexported by prominent *tidyverse*
   packages. It could have been annoying if they masked *fastpipe* 's operator(s)

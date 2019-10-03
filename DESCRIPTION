@@ -2,10 +2,18 @@ Package: fastpipe
 Title: A fast pipe implementation
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Antoine",
-           family = "Fabri",
-           role = c("aut", "cre"),
-           email = "antoine.fabri@gmail.com")
+    c(person(given = "Antoine",
+             family = "Fabri",
+             role = c("aut", "cre"),
+             email = "antoine.fabri@gmail.com"),
+      person(given = "Stefan Milton",
+             family = "Bache",
+             role = "ctb",
+             email = "stefan@stefanbache.dk"),
+      person(given = "Hadley",
+             family = "Wickham",
+             role = "ctb",
+             email = "hadley@rstudio.com"))
 Description: We propose an implementation entirely compatible with magrittr but faster, more consistent, and solving most of its current issues.
 License: GPL-3
 Encoding: UTF-8
