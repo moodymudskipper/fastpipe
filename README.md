@@ -57,8 +57,8 @@ identical(
 
   - It considers `!!!.` as `.` when deciding wether to insert a dot
 
-This was requested by Lionel and seems fairly reasonable as its is
-unlikely that a user will nedd to use both `.` and `!!!.` in a call.
+This was requested by Lionel and seems fairly reasonable as it’s is
+unlikely that a user will need to use both `.` and `!!!.` in a call.
 
 ``` r
 letters[1:3] %>% rlang::list2(!!!.)
@@ -117,9 +117,9 @@ c(a = 1, b = 2) %S>% data.frame(!!!.)
 ``` r
 1000000 %L>% rnorm() %L>% sapply(cos) %>% max
 #> rnorm(.)   ...
-#> ~  0.25 sec
+#> ~  0.26 sec
 #> sapply(., cos)   ...
-#> ~  1.95 sec
+#> ~  2.11 sec
 #> [1] 1
 ```
 
@@ -151,11 +151,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression            min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>       <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 magrittr::`%>%`   148.3us  350.8us     2660.   88.57KB     4.49
-#> 2 fastpipe::`%>%`    54.6us  166.8us     6165.        0B     2.08
-#> 3 fastpipe::`%>>%`   11.9us   35.1us    29830.    4.45KB     5.97
-#> 4 base                1.6us    4.3us   241732.        0B    24.2 
-#> 5 median(1:3)        41.2us  101.5us    10331.   26.61KB     2.48
+#> 1 magrittr::`%>%`   113.5us  250.8us     3104.   88.57KB     6.73
+#> 2 fastpipe::`%>%`    44.8us   90.3us     9188.        0B     4.23
+#> 3 fastpipe::`%>>%`    8.1us     19us    42288.    4.45KB     8.46
+#> 4 base                1.3us    3.1us   297595.        0B    29.8 
+#> 5 median(1:3)        24.9us   54.4us    14621.   26.61KB     4.32
 rm(`%>%`) # reseting `%>%` to fastpipe::`%>%`
 ```
 
@@ -187,7 +187,7 @@ it up as follow :
 #>     rhs_call <- substitute(rhs)
 #>     eval(rhs_call, envir = list(. = lhs), enclos = parent.frame())
 #> }
-#> <bytecode: 0x000000001abe3eb8>
+#> <bytecode: 0x000000001abe5960>
 #> <environment: namespace:fastpipe>
 ```
 
@@ -261,7 +261,7 @@ don’t.
 #>         lhs
 #>     }
 #> }
-#> <bytecode: 0x00000000187272f8>
+#> <bytecode: 0x000000001524e888>
 #> <environment: namespace:fastpipe>
 . %>% sin %>% cos() %T>% tan(.)
 #> function (.) 
@@ -299,11 +299,11 @@ bench::mark(check=F,
 #> # A tibble: 5 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  735.1us   1.44ms      595.    63.2KB     6.78
-#> 2 fastpipe      109.1us  402.1us     2772.    32.1KB     6.68
-#> 3 magrittr      156.2us  287.7us     2750.    13.8KB     6.52
-#> 4 base           13.8us   26.1us    30011.    10.1KB     6.00
-#> 5 median(1:3)    29.4us   58.1us    13955.        0B     4.36
+#> 1 rlang_lambda  718.9us   1.47ms      589.    63.2KB     6.85
+#> 2 fastpipe      120.1us  226.1us     3352.    32.1KB     6.77
+#> 3 magrittr      153.9us    370us     2479.    13.8KB     6.56
+#> 4 base           12.1us   28.9us    28612.    10.1KB     5.72
+#> 5 median(1:3)      28us   58.7us    13592.        0B     4.33
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # functional sequence with 1000 iterations
@@ -315,22 +315,52 @@ bench::mark(check=F,
   magrittr =
   vapply(1:1000, . %>% identity %>% identity() %>% (identity) %>% {identity(.)}, integer(1)),
   base = 
-  vapply(1:1000, function(x) identity(identity(identity(identity(x)))) , integer(1)),
-  `median(1:3)` = median(1:3)
+  vapply(1:1000, function(x) identity(identity(identity(identity(x)))) , integer(1))
 )
 #> Warning: Some expressions had a GC in every iteration; so filtering is
 #> disabled.
-#> # A tibble: 5 x 6
+#> # A tibble: 4 x 6
 #>   expression        min   median `itr/sec` mem_alloc `gc/sec`
 #>   <bch:expr>   <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl>
-#> 1 rlang_lambda  371.1ms 394.51ms      2.53  277.39KB     6.34
-#> 2 fastpipe       19.5ms  30.27ms     31.8     3.95KB     5.96
-#> 3 magrittr       6.74ms  15.94ms     62.9     4.23KB     7.86
-#> 4 base           2.03ms   5.46ms    175.     14.09KB     5.95
-#> 5 median(1:3)    30.2us   73.6us  11577.          0B     4.00
+#> 1 rlang_lambda 322.91ms 358.17ms      2.79  277.39KB     5.58
+#> 2 fastpipe      19.64ms  42.77ms     23.2     3.95KB     5.79
+#> 3 magrittr       7.96ms  16.16ms     57.8     4.23KB     5.98
+#> 4 base              2ms   3.64ms    202.     14.09KB     7.94
 ```
 
-## Note
+## Breaking changes
+
+The fact that the tests of *magrittr* are passed by *fastpipe* doesn’t
+mean that *fastpipe* will necessarily behave as expected by *magrittr*’s
+users in all cicumstances.
+
+Here are the main such cases :
+
+  - In *pastpipe* functional sequences don’t have a class and are not
+    subsetable. This is a feature that Stefan Bache wanted to weed out
+    of his package, but can still break some code.
+
+  - We said earlier that the instances of using both `!!!.` and `.` are
+    expected to be rare, but they happen nonetheless. The call
+    `mtcars[8:11] %>% dplyr::count(!!!.)` works with *magrittr* but with
+    *fastpipe* we need `mtcars[8:11] %>% dplyr::count(., !!!.)`.
+
+  - If `%T>%` or `%$%` are not reexported by a package which reexports
+    `%>%`, they will not be usable at all, while at the moment after
+    attaching dplyr you can do `cars %$% speed %>% head(2)` even if
+    `%$%` is nowhere to be found. It’s a feature of *fastpipe* rather
+    than a bug but will still break the code of those who forgot to
+    attach *magrittr* and had their code work by luck.
+
+  - If reexporting `%>%` from *fastpipe*, one must also reexport `%>>%`
+    as it is used by functional sequences.
+
+  - If you do strange things like ``cars %>% `$`("spee")`` it won’t work
+    with *fastpipe* because `$`, `::` and `:::` are special cases and
+    *fastpipe* would basically try to run `'$'("spee",)(cars)` and choke
+    because there’d be no second argument to `$`.
+
+## Notes
 
   - The package *magrittr* was created by Stefan Milton Bache and Hadley
     Wickham. The design of the pipe’s interface and most of the testing
@@ -340,14 +370,20 @@ bench::mark(check=F,
   - *magrittr*’s pipe is widespread and reexported by prominent
     *tidyverse* packages. It could have been annoying if they masked
     *fastpipe* ’s operator(s) each time so I set a hook so that whenever
-    *magrittr*, *dplyr*, *purrr*, or *tidyr* are attached *fastpipe*
-    will be detached and reattached at the end of the search path. This
-    assumes that if you attach *fastpipe* you want to use its pipes by
-    default, which I think is reasonnable. A message makes it explicit,
-    for instance :
+    one of those prominent packages is attached, *fastpipe* will be
+    detached and reattached at the end of the search path. This assumes
+    that if you attach *fastpipe* you want to use its pipes by default,
+    which I think is reasonable. A message makes it explicit, for
+    instance :
 
 > Attaching package: ‘dplyr’
 > 
 > The following object is masked \_by\_ ‘package:fastpipe’:
 > 
 >     %>%
+
+The current list of the packages subjects to this hook is : *magrittr*,
+*dplyr*, *purrr*, *tidyr*, *stringr*, *forcats*, *rvest*, *modelr*,
+*testthat*. However many more packages reexport magrittr’s pipe and the
+safest way to make sure you’re using *fastpipe* is to attach it after
+all other packages.
