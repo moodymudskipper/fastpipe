@@ -20,8 +20,7 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat (>= 2.1.0),
-    covr
-Imports: 
+    covr,
     rlang
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)

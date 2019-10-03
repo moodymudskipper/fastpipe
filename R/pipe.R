@@ -89,6 +89,8 @@ build_pipes(
     insert_dot(substitute(rhs)),
   returned_call =
     {
+      if(!requireNamespace("rlang"))
+        stop("You need to have the package 'rlang' installed to use `%S>%` or `%S>>%`.")
       # splice
       rhs_call <- substitute(rlang::expr(rhs),list(rhs=rhs_call))
       rhs_call <- eval(rhs_call, envir = list(`.` = lhs), enclos = parent.frame())
