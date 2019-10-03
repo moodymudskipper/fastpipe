@@ -70,8 +70,8 @@ identical(
 
 * It considers `!!!.` as `.` when deciding wether to insert a dot
 
-This was requested by Lionel and seems fairly reasonable as its is unlikely that
-a user will nedd to use both `.` and `!!!.` in a call.
+This was requested by Lionel and seems fairly reasonable as it's is unlikely that
+a user will need to use both `.` and `!!!.` in a call.
 
 ```{r}
 letters[1:3] %>% rlang::list2(!!!.)
@@ -250,8 +250,7 @@ bench::mark(check=F,
   magrittr =
   vapply(1:1000, . %>% identity %>% identity() %>% (identity) %>% {identity(.)}, integer(1)),
   base = 
-  vapply(1:1000, function(x) identity(identity(identity(identity(x)))) , integer(1)),
-  `median(1:3)` = median(1:3)
+  vapply(1:1000, function(x) identity(identity(identity(identity(x)))) , integer(1))
 )
 ```
 
@@ -294,9 +293,10 @@ no second argument to `$`.
 * The package is young and might still change.
 * *magrittr*'s pipe is widespread and reexported by prominent *tidyverse*
   packages. It could have been annoying if they masked *fastpipe* 's operator(s)
-  each time so I set a hook so that whenever *magrittr*, *dplyr*, *purrr*, or *tidyr* are attached *fastpipe* will be detached and reattached at the end of
+  each time so I set a hook so that whenever one of those prominent packages is
+  attached,  *fastpipe* will be detached and reattached at the end of
   the search path. This assumes that if you attach *fastpipe* you want to use
-  its pipes by default, which I think is reasonnable. A message makes it explicit,
+  its pipes by default, which I think is reasonable. A message makes it explicit,
   for instance : 
   
 > Attaching package: ‘dplyr’
@@ -304,3 +304,7 @@ no second argument to `$`.
 > The following object is masked \_by\_ ‘package:fastpipe’:
 >
 >     %>%
+
+The current list of the packages subjects to this hook is : *magrittr*, *dplyr*, *purrr*, *tidyr*, *stringr*, *forcats*, *rvest*, *modelr*, *testthat*. However many more packages reexport
+magrittr's pipe and the safest way to make sure you're using *fastpipe* is to
+attach it after all other packages.
