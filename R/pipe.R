@@ -1,4 +1,3 @@
-# The way we collapse the functions is not robust!!! we do like there are only standard pipes
 
 #' Pipes
 #'
