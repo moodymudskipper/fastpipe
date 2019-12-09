@@ -7,6 +7,9 @@ coverage](https://codecov.io/gh/moodymudskipper/fastpipe/branch/master/graph/bad
 
 # fastpipe
 
+> DISCLAIMER : There was a big oversight and I'm a bit embarrassed about it, nested pipe calls such as `cars %>% summarize_all(. %>% mean)` fail. I'll see if I can fix this but meanwhile I must admit this is makes the package much less robust that I'd like it to be!
+> `%>>%` works fine, nested or not. The moral of the story is there's a reason why one wants to avoid playing with global variables.
+
 This package proposes an alternative to the pipe from the *magrittr*
 package.
 
